@@ -8,8 +8,8 @@ from app.schemas.task_schema import (
     TaskResponse
 )
 
-from app.services.openai_service import (
-    openai_service
+from app.services.gemini_service import (
+    gemini_service
 )
 
 from app.core.logging_config import (
@@ -61,12 +61,12 @@ class TaskService:
 
             task.status = "running"
 
-            ai_result = await openai_service.generate_response(
+            ai_result = await gemini_service.generate_response(
                 task.task
             )
 
             logger.info(
-                f"OpenAI response received"
+                "Gemini response received"
             )
 
             task.status = "completed"

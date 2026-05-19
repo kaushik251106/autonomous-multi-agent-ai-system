@@ -18,8 +18,8 @@ class Settings:
         "True"
     ) == "True"
 
-    OPENAI_API_KEY: str = os.getenv(
-        "OPENAI_API_KEY",
+    GEMINI_API_KEY: str = os.getenv(
+        "GEMINI_API_KEY",
         ""
     )
 
