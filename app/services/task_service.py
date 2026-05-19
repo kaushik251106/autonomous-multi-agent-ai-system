@@ -8,6 +8,14 @@ from app.schemas.task_schema import (
     TaskResponse
 )
 
+from app.services.openai_service import (
+    openai_service
+)
+
+from app.core.logging_config import (
+    logger
+)
+
 
 class TaskService:
 
@@ -43,17 +51,37 @@ class TaskService:
         task_id: str
     ):
 
-        task = self.tasks[task_id]
+        try:
 
-        task.status = "running"
+            task = self.tasks[task_id]
 
-        await asyncio.sleep(5)
+            logger.info(
+                f"Executing task: {task.task}"
+            )
 
-        task.status = "completed"
+            task.status = "running"
 
-        task.result = (
-            f"AI processed task: {task.task}"
-        )
+            ai_result = await openai_service.generate_response(
+                task.task
+            )
+
+            logger.info(
+                f"OpenAI response received"
+            )
+
+            task.status = "completed"
+
+            task.result = ai_result
+
+        except Exception as e:
+
+            logger.error(
+                f"Task execution failed: {str(e)}"
+            )
+
+            task.status = "failed"
+
+            task.result = str(e)
 
     async def get_task(
         self,

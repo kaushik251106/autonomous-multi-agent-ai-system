@@ -2,6 +2,10 @@ from openai import AsyncOpenAI
 
 from app.core.config import settings
 
+from app.core.logging_config import (
+    logger
+)
+
 
 class OpenAIService:
 
@@ -16,28 +20,24 @@ class OpenAIService:
         prompt: str
     ) -> str:
 
+        logger.info(
+            "Sending request to OpenAI"
+        )
+
         response = await self.client.chat.completions.create(
 
             model="gpt-4.1-mini",
 
             messages=[
 
-                # =========================================
-                # SYSTEM PROMPT
-                # =========================================
                 {
                     "role": "system",
                     "content": (
                         "You are an advanced AI "
-                        "research assistant specialized "
-                        "in AI engineering, software "
-                        "architecture, and autonomous systems."
+                        "research assistant."
                     )
                 },
 
-                # =========================================
-                # USER PROMPT
-                # =========================================
                 {
                     "role": "user",
                     "content": prompt
@@ -48,7 +48,11 @@ class OpenAIService:
             temperature=0.7
         )
 
-        return response.choices[0].message.content
+        logger.info(
+            "Received OpenAI response"
+        )
 
+        return response.choices[0].message.content
+        
 
 openai_service = OpenAIService()
