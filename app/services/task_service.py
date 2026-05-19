@@ -8,8 +8,8 @@ from app.schemas.task_schema import (
     TaskResponse
 )
 
-from app.services.gemini_service import (
-    gemini_service
+from app.services.openrouter_service import (
+    openrouter_service
 )
 
 from app.core.logging_config import (
@@ -21,6 +21,10 @@ class TaskService:
 
     def __init__(self):
 
+        logger.info(
+            "Initializing TaskService"
+        )
+
         self.tasks = {}
 
     async def process_task(
@@ -29,6 +33,10 @@ class TaskService:
     ) -> TaskResponse:
 
         task_id = str(uuid.uuid4())
+
+        logger.info(
+            f"Creating task: {task_id}"
+        )
 
         task = TaskResponse(
             task_id=task_id,
@@ -39,6 +47,10 @@ class TaskService:
         )
 
         self.tasks[task_id] = task
+
+        logger.info(
+            f"Stored task: {task_id}"
+        )
 
         asyncio.create_task(
             self.execute_task(task_id)
@@ -61,17 +73,17 @@ class TaskService:
 
             task.status = "running"
 
-            ai_result = await gemini_service.generate_response(
+            ai_result = await openrouter_service.generate_response(
                 task.task
-            )
-
-            logger.info(
-                "Gemini response received"
             )
 
             task.status = "completed"
 
             task.result = ai_result
+
+            logger.info(
+                f"Task completed: {task_id}"
+            )
 
         except Exception as e:
 
@@ -87,6 +99,14 @@ class TaskService:
         self,
         task_id: str
     ):
+
+        logger.info(
+            f"Fetching task: {task_id}"
+        )
+
+        logger.info(
+            f"Available tasks: {list(self.tasks.keys())}"
+        )
 
         return self.tasks.get(task_id)
 
