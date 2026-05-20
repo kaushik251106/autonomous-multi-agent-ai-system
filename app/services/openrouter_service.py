@@ -6,6 +6,10 @@ from app.core.logging_config import (
     logger
 )
 
+from app.prompts.prompt_manager import (
+    prompt_manager
+)
+
 
 class OpenRouterService:
 
@@ -25,26 +29,17 @@ class OpenRouterService:
             "Sending request to OpenRouter"
         )
 
+        messages = (
+            prompt_manager.build_chat_messages(
+                prompt
+            )
+        )
+
         response = await self.client.chat.completions.create(
 
             model="openchat/openchat-7b:free",
 
-            messages=[
-
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an advanced AI "
-                        "research assistant."
-                    )
-                },
-
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-
-            ],
+            messages=messages,
 
             temperature=0.7
         )
