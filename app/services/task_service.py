@@ -12,6 +12,10 @@ from app.services.openrouter_service import (
     openrouter_service
 )
 
+from app.services.workflow_classifier import (
+    workflow_classifier
+)
+
 from app.core.logging_config import (
     logger
 )
@@ -34,15 +38,22 @@ class TaskService:
 
         task_id = str(uuid.uuid4())
 
-        logger.info(
-            f"Creating task: {task_id}"
+        workflow = await workflow_classifier.classify_task(
+            task_data.task
         )
 
         task = TaskResponse(
+
             task_id=task_id,
+
             status="pending",
+
             task=task_data.task,
+
             created_at=datetime.utcnow(),
+
+            workflow=workflow.dict(),
+
             result=None
         )
 
@@ -67,19 +78,15 @@ class TaskService:
 
             task = self.tasks[task_id]
 
-            logger.info(
-                f"Executing task: {task.task}"
-            )
-
             task.status = "running"
 
             ai_result = await openrouter_service.generate_response(
                 task.task
             )
 
-            task.status = "completed"
-
             task.result = ai_result
+
+            task.status = "completed"
 
             logger.info(
                 f"Task completed: {task_id}"
@@ -93,20 +100,15 @@ class TaskService:
 
             task.status = "failed"
 
-            task.result = str(e)
+            task.result = {
+
+                "error": str(e)
+            }
 
     async def get_task(
         self,
         task_id: str
     ):
-
-        logger.info(
-            f"Fetching task: {task_id}"
-        )
-
-        logger.info(
-            f"Available tasks: {list(self.tasks.keys())}"
-        )
 
         return self.tasks.get(task_id)
 
